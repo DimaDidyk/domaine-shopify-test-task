@@ -1,0 +1,28 @@
+{
+  "name": "domaine-shopify-test-task",
+  "version": "1.0.0",
+  "description": "[![Build status](https://github.com/shopify/dawn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shopify/dawn/actions/workflows/ci.yml?query=branch%3Amain)\r [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?color=informational)](/.github/CONTRIBUTING.md)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"shopify theme dev\" \"tailwindcss -i ./src/tailwind.css -o ./assets/tailwind.css --watch\"",
+    "build": "tailwindcss -i ./src/tailwind.css -o ./assets/tailwind.css --minify",
+    "push": "npm run build && shopify theme push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DimaDidyk/domaine-shopify-test-task.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DimaDidyk/domaine-shopify-test-task/issues"
+  },
+  "homepage": "https://github.com/DimaDidyk/domaine-shopify-test-task#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.4",
+    "concurrently": "^9.2.1",
+    "tailwindcss": "^4.2.4"
+  }
+}
