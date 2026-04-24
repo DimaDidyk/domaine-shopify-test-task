@@ -1,3 +1,41 @@
+# Domaine — Shopify Test Task
+
+> **Store password:** `owtwai`
+
+## Preview Links
+
+| Page | URL |
+|---|---|
+| Store | https://dima-didyk-dev.myshopify.com/ |
+| Collection (Shirt) | https://dima-didyk-dev.myshopify.com/collections/shirt |
+
+## What Was Built
+
+This is a test task submission built on top of Shopify's default **Dawn** theme with **Tailwind CSS v4** integrated for utility-first styling.
+
+### Custom Product Card with Color Swatches
+
+The main deliverable is a product card component built entirely from scratch:
+
+**[`snippets/card-product-colors.liquid`](https://github.com/DimaDidyk/domaine-shopify-test-task/blob/main/snippets/card-product-colors.liquid)**
+
+#### Features
+
+- **Color swatch dots** rendered from Shopify native color metafields (`shopify.color-pattern`, type: `List > Color`) — no third-party libraries
+- **Image swap on swatch click** — primary and hover images update via srcset swap, sourced from variant-assigned media and a naming convention (`{color-handle}-secondary.jpg`)
+- **Price update on swatch click** — price and strikethrough compare-at price reflect the selected color variant
+- **On sale badge** — shown/hidden per variant based on `compare_at_price > price`
+- **Hover image transition** — secondary image fades in on card hover using Tailwind `group-hover` and CSS opacity transition
+- **Accessible swatches** — `aria-pressed`, `aria-label`, and keyboard-focusable buttons
+
+#### Architecture Notes
+
+- Swatch colors are sourced from the product-level metafield (`card_product.metafields.shopify['color-pattern'].value`), which returns a list of metaobjects each with a `.color` hex field. Index position aligns with `color_option.values` order.
+- Supporting snippets `image.liquid` and `image-srcset.liquid` were built as generic, reusable primitives — no card-specific concerns leaked into them.
+- JS is scoped inside `{% javascript %}` (Shopify-deduplicated) and uses event delegation per card via `data-product-card`, `data-swatch`, `data-card-price`, and `data-card-badge` attributes.
+
+---
+
 # Dawn
 
 [![Build status](https://github.com/shopify/dawn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Shopify/dawn/actions/workflows/ci.yml?query=branch%3Amain)
