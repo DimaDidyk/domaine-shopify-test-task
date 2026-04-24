@@ -1,0 +1,208 @@
+{% doc %}
+  Renders a product card with color variant swatches and hover image swap.
+
+Merchant image convention: for each color variant, assign its primary image in the
+Shopify admin (Edit variant → Media) and upload a hover image named
+{color-handle}-secondary.jpg as an additional product image (no variant assignment needed).
+
+Swatch colors are read from variant metafield: shopify.color-pattern (type: color).
+
+  @param {object} card_product - The product object
+  @param {string} section_id - The ID of the section containing this card
+  @param {boolean} [lazy_load] - Lazy load images. Default: true
+
+  @example
+  {% render 'card-product-colors', card_product: product, section_id: section.id %}
+{% enddoc %}
+
+{%- liquid
+  assign initial_variant = card_product.selected_or_first_available_variant
+  assign display_image = initial_variant.featured_image | default: card_product.featured_media
+
+  assign on_sale = false
+  if initial_variant.compare_at_price > initial_variant.price
+    if initial_variant.available
+      assign on_sale = true
+    endif
+  endif
+
+  assign sold_out = false
+  if initial_variant.available == false
+    assign sold_out = true
+  endif
+
+  assign color_option = card_product.options_with_values | where: 'name', 'Color' | first
+  assign color_option_index = color_option.position | minus: 1
+-%}
+
+{%- assign hover_media = card_product.media[1] | default: display_image -%}
+{%- if color_option -%}
+  {%- assign initial_color_handle = initial_variant.options[color_option_index] | handleize -%}
+  {%- for media in card_product.media -%}
+    {%- if media.src contains initial_color_handle -%}
+      {%- if media.src contains '-secondary' -%}
+        {%- assign hover_media = media -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- if card_product and card_product != empty -%}
+  <div class="product-card" data-product-card>
+    <a
+      href="{{ card_product.url }}"
+      class="block relative aspect-4/5 overflow-hidden rounded-[10px] group border border-[#E8E8E8] p-8"
+    >
+      {%- if display_image -%}
+        {%- render 'image',
+          image: display_image,
+          lazy_load: lazy_load,
+          class: 'js-card-image-primary w-full h-full object-cover transition-opacity duration-300'
+        -%}
+        {%- render 'image',
+          image: hover_media,
+          lazy_load: lazy_load,
+          class: 'js-card-image-secondary absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300'
+        -%}
+      {%- else -%}
+        {{ 'product-apparel-2' | placeholder_svg_tag: 'w-full h-full object-cover text-gray-200' }}
+      {%- endif -%}
+
+      {%- render 'card-product-badge', type: 'on_sale', visible: on_sale -%}
+      {%- render 'card-product-badge', type: 'sold_out', visible: sold_out -%}
+    </a>
+
+    {%- assign color_list = card_product.metafields.shopify['color-pattern'].value -%}
+    {%- if color_option and color_list -%}
+      <div class="flex flex-wrap gap-2 mt-6">
+        {%- for value in color_option.values -%}
+          {%- assign color_handle = value | handleize -%}
+
+          {%- for variant in card_product.variants -%}
+            {%- if variant.options[color_option_index] == value -%}
+              {%- assign color_variant = variant -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- assign swatch_hover_media = color_variant.featured_image -%}
+          {%- for media in card_product.media -%}
+            {%- if media.src contains color_handle and media.src contains '-secondary' -%}
+              {%- assign swatch_hover_media = media -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- capture swatch_primary_srcset -%}{% render 'image-srcset', image: color_variant.featured_image %}{%- endcapture -%}
+          {%- capture swatch_hover_srcset -%}{% render 'image-srcset', image: swatch_hover_media %}{%- endcapture -%}
+
+          {%- assign variant_on_sale = false -%}
+          {%- if color_variant.compare_at_price and color_variant.available -%}
+            {%- assign variant_on_sale = true -%}
+          {%- endif -%}
+
+          {%- capture swatch_price_html -%}
+            {%- if color_variant.available and color_variant.compare_at_price > color_variant.price -%}
+              <s class="text-[14px] text-[#111111]">{{ color_variant.compare_at_price | money }}</s>
+              <span class="text-[14px] text-[#FF0000] ml-1">{{ color_variant.price | money }}</span>
+            {%- else -%}
+              <span class="text-[14px] text-[#111111]">{{ color_variant.price | money }}</span>
+            {%- endif -%}
+          {%- endcapture -%}
+
+          <button
+            type="button"
+            class="w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer aria-pressed:border-black"
+            data-swatch
+            data-swatch-primary-srcset="{{ swatch_primary_srcset | strip | escape }}"
+            data-swatch-hover-srcset="{{ swatch_hover_srcset | strip | escape }}"
+            data-swatch-price-html="{{ swatch_price_html | strip | escape }}"
+            data-swatch-on-sale="{{ variant_on_sale }}"
+            data-swatch-sold-out="{% if color_variant.available %}false{% else %}true{% endif %}"
+            aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-label="{{ value | escape }}"
+          >
+            {%- assign swatch_color = blank -%}
+            {%- if color_list -%}
+              {%- for color_entry in color_list -%}
+                {%- if forloop.index0 == forloop.parentloop.index0 -%}
+                  {%- assign swatch_color = color_entry -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+
+            {%- if swatch_color != blank and swatch_color.color -%}
+              <span
+                class="block w-full h-full rounded-full border border-black/10"
+                style="background: {{ swatch_color.color }};"
+              ></span>
+            {%- else -%}
+              <span class="block w-full h-full rounded-full border border-gray-300 bg-gray-100"></span>
+            {%- endif -%}
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <div class="mt-6">
+      {%- if card_product.vendor != blank -%}
+        <p class="text-[14px] text-[#111111]">{{ card_product.vendor }}</p>
+      {%- endif -%}
+      <h3 class="mt-2">
+        <a href="{{ card_product.url }}" class="font-medium text-[16px] text-[#0A4874] hover:underline">
+          {{- card_product.title | escape -}}
+        </a>
+      </h3>
+      <div class="mt-1" data-card-price>
+        {%- if initial_variant.available and initial_variant.compare_at_price > initial_variant.price -%}
+          <s class="text-[14px] text-[#111111]">{{ initial_variant.compare_at_price | money }}</s>
+          <span class="text-[14px] text-[#FF0000] ml-1">{{ initial_variant.price | money }}</span>
+        {%- else -%}
+          <span class="text-[14px] text-[#111111]">{{ initial_variant.price | money }}</span>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% javascript %}
+  function swapCardImage(img, srcset) {
+    console.log(img);
+    if (!img || !srcset) return;
+    img.srcset = srcset;
+    const parts = srcset.split(',');
+    img.src = parts[Math.floor(parts.length / 2)].trim().split(' ')[0];
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-product-card]').forEach(function (card) {
+      card.querySelectorAll('[data-swatch]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          // aria
+          card.querySelectorAll('[data-swatch-primary-srcset]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+          btn.setAttribute('aria-pressed', 'true');
+
+          // images
+          swapCardImage(card.querySelector('.js-card-image-primary'), btn.dataset.swatchPrimarySrcset);
+          swapCardImage(card.querySelector('.js-card-image-secondary'), btn.dataset.swatchHoverSrcset);
+
+          // price
+          const priceEl = card.querySelector('[data-card-price]');
+          priceEl.innerHTML = btn.dataset.swatchPriceHtml;
+
+          // on sale badge
+          const isOnSale = btn.dataset.swatchOnSale === 'true';
+          const badgeCL = card.querySelector('[data-card-badge]').classList;
+          isOnSale ? badgeCL.remove('hidden') : badgeCL.add('hidden');
+
+          // sold out badge
+          const isSoldOut = btn.dataset.swatchSoldOut === 'true';
+          const soldOutBadgeCL = card.querySelector('[data-card-sold-out-badge]').classList;
+          isSoldOut ? soldOutBadgeCL.remove('hidden') : soldOutBadgeCL.add('hidden');
+        });
+      });
+    });
+  });
+{% endjavascript %}

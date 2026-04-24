@@ -1,0 +1,39 @@
+{% doc %}
+  Renders a responsive image with srcset, lazy loading, and fetch priority.
+
+  @param {image} image - The image object
+  @param {string} [class] - CSS classes applied to the img element
+  @param {string} [sizes] - The sizes attribute. Defaults to a 4-column card layout breakpoint set
+  @param {boolean} [lazy_load] - Lazy load the image. Default: true. Pass false for above-the-fold images
+  @param {string} [widths] - Comma-separated widths forwarded to the srcset snippet
+
+  @example
+  {% render 'image', image: product.featured_image, lazy_load: false %}
+  {% render 'image', image: product.featured_image, class: 'w-full h-full object-cover' %}
+{% enddoc %}
+
+{%- liquid
+  if lazy_load == false
+    assign loading = 'eager'
+    assign fetchpriority = 'high'
+  else
+    assign loading = 'lazy'
+    assign fetchpriority = 'auto'
+  endif
+
+  assign img_sizes = sizes | default: '(min-width: 1200px) 25vw, (min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw'
+-%}
+
+{%- capture img_srcset -%}{% render 'image-srcset', image: image, widths: widths %}{%- endcapture -%}
+
+<img
+  src="{{ image | image_url: width: 533 }}"
+  srcset="{{ img_srcset | strip }}"
+  sizes="{{ img_sizes }}"
+  alt="{{ image.alt | escape }}"
+  width="{{ image.width }}"
+  height="{{ image.height }}"
+  loading="{{ loading }}"
+  fetchpriority="{{ fetchpriority }}"
+  class="{{ class }}"
+>

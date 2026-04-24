@@ -1,0 +1,29 @@
+{% doc %}
+  Renders a product card badge.
+
+  @param {string} type - Badge type: 'on_sale' or 'sold_out'
+  @param {boolean} visible - Whether the badge is visible
+
+  @example
+  {% render 'card-product-badge', type: 'on_sale', visible: on_sale %}
+  {% render 'card-product-badge', type: 'sold_out', visible: sold_out %}
+{% enddoc %}
+
+{%- liquid
+  if type == 'on_sale'
+    assign badge_label = 'products.product.on_sale' | t
+    assign badge_color = 'border-red-500 text-red-500'
+    assign badge_data = 'data-card-badge'
+  elsif type == 'sold_out'
+    assign badge_label = 'products.product.sold_out' | t
+    assign badge_color = 'border-gray-500 text-gray-500'
+    assign badge_data = 'data-card-sold-out-badge'
+  endif
+-%}
+
+<span
+  {{ badge_data }}
+  class="{% unless visible %}hidden {% endunless %}absolute top-6 left-6 px-[12px] py-[4px] text-[15px] font-medium leading-[18px] border border-solid {{ badge_color }} rounded-full bg-white"
+>
+  {{- badge_label -}}
+</span>

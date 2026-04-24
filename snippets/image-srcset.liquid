@@ -1,0 +1,22 @@
+{% doc %}
+  Outputs a srcset attribute string for a given image object.
+  Intended to be used inside a capture tag to build srcset strings.
+
+  @param {image} image - The image object
+  @param {string} [widths] - Comma-separated list of widths. Defaults to a generic responsive set.
+
+  @example
+  {%- capture srcset -%}{% render 'image-srcset', image: product.featured_image %}{%- endcapture -%}
+  {%- capture srcset -%}{% render 'image-srcset', image: product.featured_image, widths: '200,400,800' %}{%- endcapture -%}
+{% enddoc %}
+
+{%- liquid
+  assign widths_string = widths | default: '165,360,533,720,940,1066'
+  assign widths_list = widths_string | split: ','
+-%}
+
+{%- for w in widths_list -%}
+  {%- assign width_num = w | strip | plus: 0 -%}
+  {%- if image.width >= width_num -%}{{ image | image_url: width: width_num }} {{ width_num }}w,{%- endif -%}
+{%- endfor -%}
+{{- image | image_url }} {{ image.width }}w
