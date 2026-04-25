@@ -1,6 +1,6 @@
 # Domaine — Shopify Test Task
 
-> **Store password:** `owtwai`
+> **Store password:** `meetdomaine!`
 
 ## Preview Links
 

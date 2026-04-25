@@ -9,4 +9,6 @@ ehthumbs.db
 Thumbs.db
 .shopify
 .idea
+shopify.theme.toml
+.claude
 node_modules/
