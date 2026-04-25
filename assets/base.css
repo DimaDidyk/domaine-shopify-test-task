@@ -710,9 +710,8 @@ summary::-webkit-details-marker {
   Focus ring - default (with offset)
 */
 
-*:focus {
+*:focus:not(:focus-visible) {
   outline: 0;
-  box-shadow: none;
 }
 
 *:focus-visible {

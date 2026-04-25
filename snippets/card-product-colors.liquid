@@ -75,7 +75,7 @@ Swatch colors are read from variant metafield: shopify.color-pattern (type: colo
 
     {%- assign color_list = card_product.metafields.shopify['color-pattern'].value -%}
     {%- if color_option and color_list -%}
-      <div class="flex flex-wrap gap-2 mt-6">
+      <div class="flex flex-wrap gap-3 mt-6">
         {%- for value in color_option.values -%}
           {%- assign color_handle = value | handleize -%}
 
@@ -113,7 +113,7 @@ Swatch colors are read from variant metafield: shopify.color-pattern (type: colo
 
           <button
             type="button"
-            class="w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer aria-pressed:border-black"
+            class="w-8 h-8 outline-none rounded-full cursor-pointer ring-1 ring-transparent ring-offset-1 aria-pressed:ring-[#0A4874]"
             data-swatch
             data-swatch-primary-srcset="{{ swatch_primary_srcset | strip | escape }}"
             data-swatch-hover-srcset="{{ swatch_hover_srcset | strip | escape }}"
@@ -135,7 +135,7 @@ Swatch colors are read from variant metafield: shopify.color-pattern (type: colo
 
             {%- if swatch_color != blank and swatch_color.color -%}
               <span
-                class="block w-full h-full rounded-full border border-black/10"
+                class="block w-full h-full rounded-full"
                 style="background: {{ swatch_color.color }};"
               ></span>
             {%- else -%}
