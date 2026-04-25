@@ -24,7 +24,7 @@ The main deliverable is a product card component built entirely from scratch:
 - **Color swatch dots** rendered from Shopify native color metafields (`shopify.color-pattern`, type: `List > Color`) — no third-party libraries
 - **Image swap on swatch click** — primary and hover images update via srcset swap, sourced from variant-assigned media and a naming convention (`{color-handle}-secondary.jpg`)
 - **Price update on swatch click** — price and strikethrough compare-at price reflect the selected color variant
-- **On sale badge** — shown/hidden per variant based on `compare_at_price > price`
+- **On sale & sold out badges** — shown/hidden per variant based on `compare_at_price > price` and `available` (rendered via reusable `snippets/card-product-badge.liquid`)
 - **Hover image transition** — secondary image fades in on card hover using Tailwind `group-hover` and CSS opacity transition
 - **Accessible swatches** — `aria-pressed`, `aria-label`, and keyboard-focusable buttons
 
